@@ -1,44 +1,106 @@
 #include <Arduino.h>
 #include <U8x8lib.h>
+#include <configuration.h>
 
 #ifdef U8X8_HAVE_HW_SPI
 #include <SPI.h>
 #endif
+#ifdef U8X8_HAVE_HW_I2C
+#include <Wire.h>
+#endif
 
-/*
-  Blink
+U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 
-  Turns an LED on for one second, then off for one second, repeatedly.
+//https://tronixstuff.com/2019/08/29/ssd1306-arduino-tutorial/
 
-  Most Arduinos have an on-board LED you can control. On the UNO, MEGA and ZERO
-  it is attached to digital pin 13, on MKR1000 on pin 6. LED_BUILTIN is set to
-  the correct LED pin independent of which board is used.
-  If you want to know what pin the on-board LED is connected to on your Arduino
-  model, check the Technical Specs of your board at:
-  https://www.arduino.cc/en/Main/Products
 
-  modified 8 May 2014
-  by Scott Fitzgerald
-  modified 2 Sep 2016
-  by Arturo Guadalupi
-  modified 8 Sep 2016
-  by Colby Newman
+enum State
+{ IDLE,
+  WASHING,
+  CURING
+};
 
-  This example code is in the public domain.
+unsigned int mode = WASHING; //hardcoded for now. remove when switch is added
+unsigned int selectedDuration = TIME0;  //hardcoded for now. remove when switch is added
 
-  http://www.arduino.cc/en/Tutorial/Blink
-*/
+//time slicing
+unsigned long interval = 1000; // tick at 1 second
+unsigned long startMillis;
+unsigned long currentMillis;
 
-// the setup function runs once when you press reset or power the board
-void setup() {
-  // initialize digital pin LED_BUILTIN as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
+
+void setup(void)
+{
+  u8x8.begin();
+  #if defined(FLIP_SCREEN)
+    u8x8.setFlipMode(1);
+  #endif
+  startMillis = millis(); //initilize the start time
 }
 
-// the loop function runs over and over again forever
-void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(2000);                       // wait for a second
-  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(2000);                       // wait for a second
+void pre(void)
+{
+  u8x8.setFont(u8x8_font_amstrad_cpc_extended_f);
+  u8x8.clear();
+
+  u8x8.inverse();
+  u8x8.print("  Wash n' Cure  ");
+  u8x8.setFont(u8x8_font_chroma48medium8_r);
+  u8x8.noInverse();
+  u8x8.setCursor(0,1);
+}
+
+void printModeName() {
+  u8x8.setFont(u8x8_font_chroma48medium8_r);
+  u8x8.drawString(0, 1, "Washing");
+  switch (mode) {
+    case 0:
+      u8x8.drawString(0, 1, "Washing");
+      break;
+    case 1:
+      u8x8.drawString(0, 1, "Curing");
+      break;
+    default:
+      u8x8.drawString(0, 1, "Washing");
+      break;
+  }
+}
+
+void updateDisplay(unsigned long time) {
+  printModeName();
+  u8x8.setFont(u8x8_font_inb33_3x6_n);
+  u8x8.setCursor(0, 2);
+  u8x8.print(selectedDuration - (time / 1000));
+}
+
+void preformWash() {
+  pre();
+  startMillis = millis(); // we need to know when we started the cycle
+  unsigned int runningDuration = 0;
+  updateDisplay(0); // just to get the first time showing
+  while (1) {
+    currentMillis = millis();
+    if(currentMillis - startMillis > interval) {
+      startMillis = millis();
+      runningDuration++;
+      updateDisplay(currentMillis);
+    }
+    if (runningDuration >= selectedDuration) {
+      break;
+    }
+  }
+}
+
+void preformCure() {
+
+}
+
+void loop(void)
+{
+  if (mode == WASHING) {
+    preformWash();
+  } else if (mode == CURING) {
+    preformCure();
+  }
+  mode = IDLE;
 }
