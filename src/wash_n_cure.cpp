@@ -43,8 +43,8 @@ unsigned long currentMillis;
 void pre(void);
 void printModeName();
 void updateCountdownDisplay(unsigned long time);
-void preformWash();
-void preformCure();
+void performWash();
+void performCure();
 
 void setup(void)
 {
@@ -93,11 +93,11 @@ void updateCountdownDisplay(unsigned long time) {
   u8x8.setFont(u8x8_font_profont29_2x3_n);
   u8x8.setCursor(0, 5);
   u8x8.print(time);
-  u8x8.print("   "); // clears extra numbers from the display
+  u8x8.print("      "); // clears extra numbers from the display
 }
 
-void preformWash() {
-  pre();
+void performWash() {
+  //pre();
   startMillis = millis(); // we need to know when we started the cycle
   int runningDuration = selectedDuration;
   updateCountdownDisplay(runningDuration); // just to get the first time showing
@@ -121,8 +121,8 @@ void preformWash() {
   }
 }
 
-void preformCure() {
-  pre();
+void performCure() {
+  //pre();
   startMillis = millis(); // we need to know when we started the cycle
   int runningDuration = selectedDuration;
   updateCountdownDisplay(runningDuration); // just to get the first time showing
@@ -135,13 +135,13 @@ void preformCure() {
       updateCountdownDisplay(runningDuration);
     }
     if (runningDuration <= 0) {
-      pre();
+      //pre();
       operatingMode = COMPLETE;
       analogWrite(UV_LED_PIN, UV_OFF);
       break;
     }
     if (digitalRead(STOP_PIN) == HIGH) {
-      pre();
+      //pre();
       operatingMode = HALTED;
       analogWrite(UV_LED_PIN, UV_OFF);
       break;
@@ -156,10 +156,10 @@ void loop(void)
     u8x8.setFont(u8x8_font_profont29_2x3_r);
     switch (operatingMode) {
       case WASHING:
-        preformWash();
+        performWash();
         break;
       case CURING:
-        preformCure();
+        performCure();
         break;
       case COMPLETE:
         u8x8.drawString(0, 5, "Complete");
