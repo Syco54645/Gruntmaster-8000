@@ -62,12 +62,12 @@ void pre(void)
   u8x8.print("  Wash n' Cure  ");
   u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.noInverse();
-  u8x8.setCursor(0,1);
   printModeName();
 }
 
 void printModeName() {
   u8x8.setFont(u8x8_font_chroma48medium8_r);
+  u8x8.setCursor(0,1);
   switch (selectedMode) {
     case WASHING:
       u8x8.drawString(0, 1, "Washing");
@@ -82,7 +82,7 @@ void printModeName() {
 }
 
 void updateDisplay(unsigned long time) {
-  printModeName();
+
   u8x8.setFont(u8x8_font_inb33_3x6_n);
   u8x8.setCursor(0, 2);
   u8x8.print(selectedDuration - (time / 1000));
@@ -132,7 +132,8 @@ void loop(void)
 
   if (selectedMode != oldSelectedMode) {
     oldSelectedMode = selectedMode;
-    pre();
+    //pre();
+    printModeName();
   }
 
   if (digitalRead(START_PIN) == HIGH) {
