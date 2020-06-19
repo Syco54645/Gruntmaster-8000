@@ -23,7 +23,9 @@ enum State
   CURING
 };
 
-unsigned int mode = WASHING; //hardcoded for now. remove when switch is added
+unsigned int operatingMode = IDLE;
+unsigned int selectedMode;
+unsigned int oldSelectedMode;
 unsigned int selectedDuration = TIME0;  //hardcoded for now. remove when switch is added
 
 //time slicing
@@ -48,7 +50,7 @@ void setup(void)
   pinMode(START_PIN, INPUT);
   pinMode(STOP_PIN, INPUT);
   pinMode(MODE_PIN, INPUT);
-
+  oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
 }
 
 void pre(void)
@@ -61,12 +63,12 @@ void pre(void)
   u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.noInverse();
   u8x8.setCursor(0,1);
+  printModeName();
 }
 
 void printModeName() {
   u8x8.setFont(u8x8_font_chroma48medium8_r);
-  u8x8.drawString(0, 1, "Washing");
-  switch (mode) {
+  switch (selectedMode) {
     case WASHING:
       u8x8.drawString(0, 1, "Washing");
       break;
@@ -99,9 +101,11 @@ void preformWash() {
       updateDisplay(currentMillis);
     }
     if (runningDuration >= selectedDuration) {
+      pre();
       break;
     }
     if (digitalRead(STOP_PIN) == HIGH) {
+      pre();
       break;
     }
   }
@@ -113,17 +117,28 @@ void preformCure() {
 
 void loop(void)
 {
+  selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
   #ifndef DEBUG
-    if (mode == WASHING) {
+    if (operatingMode == WASHING) {
       preformWash();
-    } else if (mode == CURING) {
+    } else if (operatingMode == CURING) {
       preformCure();
+    } else {
+      u8x8.setFont(u8x8_font_chroma48medium8_r);
+      u8x8.setCursor(0,1);
+      u8x8.draw2x2String(0, 5, "Idle");
     }
   #endif
-  mode = IDLE;
+
+  if (selectedMode != oldSelectedMode) {
+    oldSelectedMode = selectedMode;
+    pre();
+  }
 
   if (digitalRead(START_PIN) == HIGH) {
-    mode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
+    operatingMode = selectedMode;
+  } else {
+    operatingMode = IDLE;
   }
 
   #if defined(DEBUG)
