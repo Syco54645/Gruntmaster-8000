@@ -13,6 +13,9 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 
 //https://tronixstuff.com/2019/08/29/ssd1306-arduino-tutorial/
 
+#define START_PIN 12
+#define STOP_PIN  11
+#define MODE_PIN  10
 
 enum State
 { IDLE,
@@ -28,6 +31,11 @@ unsigned long interval = 1000; // tick at 1 second
 unsigned long startMillis;
 unsigned long currentMillis;
 
+void pre(void);
+void printModeName();
+void updateDisplay(unsigned long time);
+void preformWash();
+void preformCure();
 
 void setup(void)
 {
@@ -35,7 +43,12 @@ void setup(void)
   #if defined(FLIP_SCREEN)
     u8x8.setFlipMode(1);
   #endif
+  pre();
   startMillis = millis(); //initilize the start time
+  pinMode(START_PIN, INPUT);
+  pinMode(STOP_PIN, INPUT);
+  pinMode(MODE_PIN, INPUT);
+
 }
 
 void pre(void)
@@ -54,10 +67,10 @@ void printModeName() {
   u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.drawString(0, 1, "Washing");
   switch (mode) {
-    case 0:
+    case WASHING:
       u8x8.drawString(0, 1, "Washing");
       break;
-    case 1:
+    case CURING:
       u8x8.drawString(0, 1, "Curing");
       break;
     default:
@@ -88,6 +101,9 @@ void preformWash() {
     if (runningDuration >= selectedDuration) {
       break;
     }
+    if (digitalRead(STOP_PIN) == HIGH) {
+      break;
+    }
   }
 }
 
@@ -97,10 +113,31 @@ void preformCure() {
 
 void loop(void)
 {
-  if (mode == WASHING) {
-    preformWash();
-  } else if (mode == CURING) {
-    preformCure();
-  }
+  #ifndef DEBUG
+    if (mode == WASHING) {
+      preformWash();
+    } else if (mode == CURING) {
+      preformCure();
+    }
+  #endif
   mode = IDLE;
+
+  if (digitalRead(START_PIN) == HIGH) {
+    mode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
+  }
+
+  #if defined(DEBUG)
+    u8x8.setFont(u8x8_font_inb33_3x6_n);
+    u8x8.setCursor(0, 2);
+    u8x8.clear();
+    if (digitalRead(STOP_PIN) == HIGH) {
+      u8x8.print(123);
+    } else if (digitalRead(START_PIN) == HIGH) {
+      u8x8.print(456);
+    } else if (digitalRead(MODE_PIN) == HIGH){
+      u8x8.print(100);
+    } else {
+      u8x8.print(789);
+    }
+  #endif
 }
