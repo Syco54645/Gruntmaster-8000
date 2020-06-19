@@ -18,9 +18,11 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define MODE_PIN  10
 
 enum State
-{ IDLE,
+{
+  IDLE,
   WASHING,
-  CURING
+  CURING,
+  COMPLETE
 };
 
 unsigned int operatingMode = IDLE;
@@ -35,7 +37,7 @@ unsigned long currentMillis;
 
 void pre(void);
 void printModeName();
-void updateDisplay(unsigned long time);
+void updateCountdownDisplay(unsigned long time);
 void preformWash();
 void preformCure();
 
@@ -80,7 +82,7 @@ void printModeName() {
   }
 }
 
-void updateDisplay(unsigned long time) {
+void updateCountdownDisplay(unsigned long time) {
   u8x8.setFont(u8x8_font_profont29_2x3_n);
   u8x8.setCursor(0, 5);
   u8x8.print(time);
@@ -91,13 +93,13 @@ void preformWash() {
   pre();
   startMillis = millis(); // we need to know when we started the cycle
   int runningDuration = selectedDuration;
-  updateDisplay(runningDuration); // just to get the first time showing
+  updateCountdownDisplay(runningDuration); // just to get the first time showing
   while (1) {
     currentMillis = millis();
     if(currentMillis - startMillis > interval) {
       startMillis = millis();
       runningDuration--;
-      updateDisplay(runningDuration);
+      updateCountdownDisplay(runningDuration);
     }
     if (runningDuration <= 0) {
       pre();
