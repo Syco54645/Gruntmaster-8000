@@ -13,9 +13,13 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 
 //https://tronixstuff.com/2019/08/29/ssd1306-arduino-tutorial/
 
-#define START_PIN 12
-#define STOP_PIN  11
-#define MODE_PIN  10
+#define START_PIN   12
+#define STOP_PIN    11
+#define MODE_PIN    10
+#define UV_LED_PIN   9
+
+#define UV_ON       255
+#define UV_OFF        0
 
 enum State
 {
@@ -53,6 +57,8 @@ void setup(void)
   pinMode(START_PIN, INPUT);
   pinMode(STOP_PIN, INPUT);
   pinMode(MODE_PIN, INPUT);
+  pinMode(UV_LED_PIN, OUTPUT);
+
   oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
 }
 
@@ -116,7 +122,31 @@ void preformWash() {
 }
 
 void preformCure() {
-
+  pre();
+  startMillis = millis(); // we need to know when we started the cycle
+  int runningDuration = selectedDuration;
+  updateCountdownDisplay(runningDuration); // just to get the first time showing
+  analogWrite(UV_LED_PIN, UV_ON);
+  while (1) {
+    currentMillis = millis();
+    if(currentMillis - startMillis > interval) {
+      startMillis = millis();
+      runningDuration--;
+      updateCountdownDisplay(runningDuration);
+    }
+    if (runningDuration <= 0) {
+      pre();
+      operatingMode = COMPLETE;
+      analogWrite(UV_LED_PIN, UV_OFF);
+      break;
+    }
+    if (digitalRead(STOP_PIN) == HIGH) {
+      pre();
+      operatingMode = HALTED;
+      analogWrite(UV_LED_PIN, UV_OFF);
+      break;
+    }
+  }
 }
 
 void loop(void)

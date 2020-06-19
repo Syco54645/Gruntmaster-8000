@@ -3,7 +3,7 @@
 //#define DEBUG
 
 //#define TIME0 120
-#define TIME0 20
+#define TIME0 10
 #define TIME1 240
 #define TIME2 360
 
