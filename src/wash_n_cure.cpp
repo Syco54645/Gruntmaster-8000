@@ -67,24 +67,24 @@ void pre(void)
 
 void printModeName() {
   u8x8.setFont(u8x8_font_chroma48medium8_r);
-  u8x8.setCursor(0,1);
   switch (selectedMode) {
     case WASHING:
-      u8x8.drawString(0, 1, "Washing");
+      u8x8.draw2x2String(0, 1, "Washing");
       break;
     case CURING:
-      u8x8.drawString(0, 1, "Curing");
+      u8x8.draw2x2String(0, 1, "Curing "); // space after needed to clear the display
       break;
     default:
-      u8x8.drawString(0, 1, "Washing");
+      u8x8.draw2x2String(0, 1, "Washing");
       break;
   }
 }
 
 void updateDisplay(unsigned long time) {
-  u8x8.setFont(u8x8_font_inb33_3x6_n);
-  u8x8.setCursor(0, 2);
+  u8x8.setFont(u8x8_font_profont29_2x3_n);
+  u8x8.setCursor(0, 5);
   u8x8.print(time);
+  u8x8.print("   "); // clears extra numbers from the display
 }
 
 void preformWash() {
@@ -123,9 +123,8 @@ void loop(void)
     } else if (operatingMode == CURING) {
       preformCure();
     } else {
-      u8x8.setFont(u8x8_font_chroma48medium8_r);
-      u8x8.setCursor(0,1);
-      u8x8.draw2x2String(0, 5, "Idle");
+      u8x8.setFont(u8x8_font_profont29_2x3_r);
+      u8x8.drawString(0, 5, "Idle");
     }
   #endif
 
