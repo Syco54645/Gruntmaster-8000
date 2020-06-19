@@ -82,25 +82,24 @@ void printModeName() {
 }
 
 void updateDisplay(unsigned long time) {
-
   u8x8.setFont(u8x8_font_inb33_3x6_n);
   u8x8.setCursor(0, 2);
-  u8x8.print(selectedDuration - (time / 1000));
+  u8x8.print(time);
 }
 
 void preformWash() {
   pre();
   startMillis = millis(); // we need to know when we started the cycle
-  unsigned int runningDuration = 0;
-  updateDisplay(0); // just to get the first time showing
+  int runningDuration = selectedDuration;
+  updateDisplay(runningDuration); // just to get the first time showing
   while (1) {
     currentMillis = millis();
     if(currentMillis - startMillis > interval) {
       startMillis = millis();
-      runningDuration++;
-      updateDisplay(currentMillis);
+      runningDuration--;
+      updateDisplay(runningDuration);
     }
-    if (runningDuration >= selectedDuration) {
+    if (runningDuration <= 0) {
       pre();
       break;
     }
