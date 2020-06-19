@@ -22,7 +22,8 @@ enum State
   IDLE,
   WASHING,
   CURING,
-  COMPLETE
+  COMPLETE,
+  HALTED
 };
 
 unsigned int operatingMode = IDLE;
@@ -103,10 +104,12 @@ void preformWash() {
     }
     if (runningDuration <= 0) {
       pre();
+      operatingMode = COMPLETE;
       break;
     }
     if (digitalRead(STOP_PIN) == HIGH) {
       pre();
+      operatingMode = HALTED;
       break;
     }
   }
@@ -120,26 +123,33 @@ void loop(void)
 {
   selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
   #ifndef DEBUG
-    if (operatingMode == WASHING) {
-      preformWash();
-    } else if (operatingMode == CURING) {
-      preformCure();
-    } else {
-      u8x8.setFont(u8x8_font_profont29_2x3_r);
-      u8x8.drawString(0, 5, "Idle");
+    u8x8.setFont(u8x8_font_profont29_2x3_r);
+    switch (operatingMode) {
+      case WASHING:
+        preformWash();
+        break;
+      case CURING:
+        preformCure();
+        break;
+      case COMPLETE:
+        u8x8.drawString(0, 5, "Complete");
+        break;
+      case HALTED:
+        u8x8.drawString(0, 5, "Halted");
+        break;
+      default:
+        u8x8.drawString(0, 5, "Idle");
+        break;
     }
   #endif
 
   if (selectedMode != oldSelectedMode) {
     oldSelectedMode = selectedMode;
-    //pre();
     printModeName();
   }
 
   if (digitalRead(START_PIN) == HIGH) {
     operatingMode = selectedMode;
-  } else {
-    operatingMode = IDLE;
   }
 
   #if defined(DEBUG)
