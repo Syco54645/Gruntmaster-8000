@@ -17,6 +17,8 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define STOP_PIN    11
 #define MODE_PIN    10
 #define UV_LED_PIN   9
+#define DIR_PIN      2
+#define STEP_PIN     3
 
 #define UV_ON       255
 #define UV_OFF        0
@@ -58,6 +60,9 @@ void setup(void)
   pinMode(STOP_PIN, INPUT);
   pinMode(MODE_PIN, INPUT);
   pinMode(UV_LED_PIN, OUTPUT);
+
+  pinMode(DIR_PIN, OUTPUT);
+  pinMode(STEP_PIN, OUTPUT);
 
   oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
 }
@@ -101,7 +106,12 @@ void performWash() {
   startMillis = millis(); // we need to know when we started the cycle
   int runningDuration = selectedDuration;
   updateCountdownDisplay(runningDuration); // just to get the first time showing
+  digitalWrite(DIR_PIN, HIGH); // Enables the motor to move in a direction
   while (1) {
+    digitalWrite(STEP_PIN,HIGH);
+    delayMicroseconds(290);
+    digitalWrite(STEP_PIN,LOW);
+    delayMicroseconds(290);
     currentMillis = millis();
     if(currentMillis - startMillis > interval) {
       startMillis = millis();
