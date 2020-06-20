@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <U8x8lib.h>
 #include <configuration.h>
+#include "A4988.h"
 
 #ifdef U8X8_HAVE_HW_SPI
 #include <SPI.h>
@@ -17,9 +18,14 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define STOP_PIN    11
 #define MODE_PIN    10
 #define UV_LED_PIN   9
+#define DIR_PIN      2
+#define STEP_PIN     3
 
 #define UV_ON       255
 #define UV_OFF        0
+#define MOTOR_STEPS 200
+
+A4988 stepper(MOTOR_STEPS, DIR_PIN, STEP_PIN);
 
 enum State
 {
@@ -58,6 +64,8 @@ void setup(void)
   pinMode(STOP_PIN, INPUT);
   pinMode(MODE_PIN, INPUT);
   pinMode(UV_LED_PIN, OUTPUT);
+
+  stepper.begin(400, 1);
 
   oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
 }
@@ -102,6 +110,7 @@ void performWash() {
   int runningDuration = selectedDuration;
   updateCountdownDisplay(runningDuration); // just to get the first time showing
   while (1) {
+    stepper.rotate(360);
     currentMillis = millis();
     if(currentMillis - startMillis > interval) {
       startMillis = millis();
