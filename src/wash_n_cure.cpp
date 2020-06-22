@@ -12,7 +12,6 @@
 
 U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 
-//https://tronixstuff.com/2019/08/29/ssd1306-arduino-tutorial/
 
 #define START_PIN   12
 #define STOP_PIN    11
@@ -52,6 +51,10 @@ void updateCountdownDisplay(unsigned long time);
 void performWash();
 void performCure();
 
+long int pos= 1000000;
+
+
+
 void setup(void)
 {
   u8x8.begin();
@@ -67,10 +70,14 @@ void setup(void)
   pinMode(DIR_PIN, OUTPUT);
   pinMode(STEP_PIN, OUTPUT);
 
-  myStepper.setMaxSpeed(1000);
+  /* myStepper.setMaxSpeed(6000);
 	myStepper.setAcceleration(1000);
-	myStepper.setSpeed(1000);
-	myStepper.moveTo(80000);
+	myStepper.setSpeed(6000);
+	myStepper.moveTo(80000*100);
+  myStepper.setMinPulseWidth(25); */
+
+  myStepper.setMaxSpeed(3000);  //200 Pulse per revolution Stepper Motor
+  myStepper.setAcceleration(1000);
 
   oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
 }
@@ -120,7 +127,7 @@ void performWash() {
     if(currentMillis - startMillis > interval) {
       startMillis = millis();
       runningDuration--;
-      updateCountdownDisplay(runningDuration);
+      //updateCountdownDisplay(runningDuration);
     }
     if (runningDuration <= 0) {
       pre();
@@ -165,7 +172,7 @@ void performCure() {
 
 void loop(void)
 {
-  selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
+  /* selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
   #ifndef DEBUG
     u8x8.setFont(u8x8_font_profont29_2x3_r);
     switch (operatingMode) {
@@ -209,5 +216,12 @@ void loop(void)
     } else {
       u8x8.print(789);
     }
-  #endif
+  #endif*/
+    if (myStepper.distanceToGo() == 0)
+  {
+    delay(200);
+    pos;
+    myStepper.moveTo(pos);
+  }
+  myStepper.run();
 }
