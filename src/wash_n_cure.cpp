@@ -31,12 +31,14 @@ enum State
 {
   IDLE,
   WASHING,
+  WASHING_REV,
+  WASHING_DOWN,
   CURING,
   COMPLETE,
   HALTED
 };
 
-unsigned int operatingMode = IDLE;
+int operatingMode = IDLE;
 unsigned int selectedMode;
 unsigned int oldSelectedMode;
 unsigned int selectedDuration = TIME0;  //hardcoded for now. remove when switch is added
@@ -45,12 +47,14 @@ unsigned int selectedDuration = TIME0;  //hardcoded for now. remove when switch 
 unsigned long interval = 1000; // tick at 1 second
 unsigned long startMillis;
 unsigned long currentMillis;
+long int pos = 1000000;
 
 void pre(void);
 void printModeName();
 void updateCountdownDisplay(unsigned long time);
 void performWash();
 void performCure();
+void spinDown();
 
 void setup(void)
 {
@@ -66,11 +70,6 @@ void setup(void)
   pinMode(UV_LED_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
   pinMode(STEP_PIN, OUTPUT);
-
-  myStepper.setMaxSpeed(1000);
-	myStepper.setAcceleration(1000);
-	myStepper.setSpeed(1000);
-	myStepper.moveTo(80000);
 
   oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
 }
@@ -115,23 +114,35 @@ void performWash() {
   int runningDuration = selectedDuration;
   updateCountdownDisplay(runningDuration); // just to get the first time showing
   while (1) {
+    if (myStepper.distanceToGo() == 0) {
+      myStepper.moveTo(pos);
+    }
     myStepper.run();
     currentMillis = millis();
     if(currentMillis - startMillis > interval) {
       startMillis = millis();
       runningDuration--;
-      updateCountdownDisplay(runningDuration);
+      //updateCountdownDisplay(runningDuration);
     }
     if (runningDuration <= 0) {
-      pre();
+      //pre();
+      spinDown();
       operatingMode = COMPLETE;
       break;
     }
     if (digitalRead(STOP_PIN) == HIGH) {
-      pre();
+      //pre();
+      spinDown();
       operatingMode = HALTED;
       break;
     }
+  }
+}
+
+void spinDown() {
+  myStepper.stop();
+  while(myStepper.speed() != 0) {
+    myStepper.runToPosition();
   }
 }
 
@@ -170,6 +181,8 @@ void loop(void)
     u8x8.setFont(u8x8_font_profont29_2x3_r);
     switch (operatingMode) {
       case WASHING:
+        myStepper.setMaxSpeed(3000);
+        myStepper.setAcceleration(500);
         performWash();
         break;
       case CURING:
