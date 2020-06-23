@@ -55,7 +55,7 @@ void printModeName();
 void updateCountdownDisplay(unsigned long time);
 void performWash();
 void performCure();
-void spinDown();
+void spinDown(bool disableStepper = true);
 void changeStepperDir();
 void setupStepper();
 
@@ -178,7 +178,7 @@ void performCure() {
 }
 
 void changeStepperDir() {
-  spinDown();
+  spinDown(false);
   pos = pos * -1;
 }
 
@@ -190,12 +190,14 @@ void setupStepper(int maxSpeed, int acceleration) {
   myStepper.setAcceleration(acceleration);
 }
 
-void spinDown() {
+void spinDown(bool disableStepper = true) {
   myStepper.stop();
   while(myStepper.speed() != 0) {
     myStepper.runToPosition();
   }
-  digitalWrite(DRV_ENABLE, HIGH); // disable the a4988 stepper drive
+  if (disableStepper) {
+    digitalWrite(DRV_ENABLE, HIGH); // disable the a4988 stepper drive
+  }
 }
 
 void loop(void)
