@@ -55,6 +55,8 @@ void updateCountdownDisplay(unsigned long time);
 void performWash();
 void performCure();
 void spinDown();
+void changeStepperDir();
+void setupStepper();
 
 void setup(void)
 {
@@ -112,6 +114,7 @@ void performWash() {
   //pre();
   startMillis = millis(); // we need to know when we started the cycle
   int runningDuration = selectedDuration;
+  long halfDuration = selectedDuration / 2;
   updateCountdownDisplay(runningDuration); // just to get the first time showing
   while (1) {
     if (myStepper.distanceToGo() == 0) {
@@ -123,6 +126,10 @@ void performWash() {
       startMillis = millis();
       runningDuration--;
       //updateCountdownDisplay(runningDuration);
+    }
+    if (runningDuration <= halfDuration and pos > 0) {
+      operatingMode = WASHING_REV;
+      changeStepperDir();
     }
     if (runningDuration <= 0) {
       //pre();
@@ -136,13 +143,6 @@ void performWash() {
       operatingMode = HALTED;
       break;
     }
-  }
-}
-
-void spinDown() {
-  myStepper.stop();
-  while(myStepper.speed() != 0) {
-    myStepper.runToPosition();
   }
 }
 
@@ -174,6 +174,26 @@ void performCure() {
   }
 }
 
+void changeStepperDir() {
+  spinDown();
+  pos = pos * -1;
+}
+
+void setupStepper(int maxSpeed, int acceleration) {
+  // todo turn the stepper on
+  pos = abs(pos); // since we change direction by pos * -1 just take the abs so it is always going the same direction at start
+  myStepper.setMaxSpeed(maxSpeed);
+  myStepper.setAcceleration(acceleration);
+}
+
+void spinDown() {
+  myStepper.stop();
+  while(myStepper.speed() != 0) {
+    myStepper.runToPosition();
+  }
+  // todo turn off stepper
+}
+
 void loop(void)
 {
   selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
@@ -181,8 +201,7 @@ void loop(void)
     u8x8.setFont(u8x8_font_profont29_2x3_r);
     switch (operatingMode) {
       case WASHING:
-        myStepper.setMaxSpeed(3000);
-        myStepper.setAcceleration(500);
+        setupStepper(WASH_MAX_SPEED, WASH_ACCELERATION);
         performWash();
         break;
       case CURING:
