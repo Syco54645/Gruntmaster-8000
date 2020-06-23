@@ -20,6 +20,7 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define UV_LED_PIN   9
 #define DIR_PIN      2
 #define STEP_PIN     3
+#define DRV_ENABLE  A3
 
 #define UV_ON       255
 #define UV_OFF        0
@@ -72,6 +73,8 @@ void setup(void)
   pinMode(UV_LED_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
   pinMode(STEP_PIN, OUTPUT);
+  pinMode(DRV_ENABLE, OUTPUT);
+  digitalWrite(DRV_ENABLE, HIGH); // disable the a4988 driver
 
   oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
 }
@@ -180,7 +183,8 @@ void changeStepperDir() {
 }
 
 void setupStepper(int maxSpeed, int acceleration) {
-  // todo turn the stepper on
+  digitalWrite(DRV_ENABLE, LOW); // enable the a4988 stepper driver
+  delay(1); // needs a delay of 1 ms before we can step the motor
   pos = abs(pos); // since we change direction by pos * -1 just take the abs so it is always going the same direction at start
   myStepper.setMaxSpeed(maxSpeed);
   myStepper.setAcceleration(acceleration);
@@ -191,7 +195,7 @@ void spinDown() {
   while(myStepper.speed() != 0) {
     myStepper.runToPosition();
   }
-  // todo turn off stepper
+  digitalWrite(DRV_ENABLE, HIGH); // disable the a4988 stepper drive
 }
 
 void loop(void)
