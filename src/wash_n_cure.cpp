@@ -84,18 +84,18 @@ void setup(void)
 
 void pre(void)
 {
-  u8x8.setFont(u8x8_font_amstrad_cpc_extended_f);
+  u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.clear();
 
   u8x8.inverse();
   u8x8.print("  Wash n' Cure  ");
-  u8x8.setFont(u8x8_font_chroma48medium8_r);
+  //u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.noInverse();
   printModeName();
 }
 
 void printModeName() {
-  u8x8.setFont(u8x8_font_chroma48medium8_r);
+  //u8x8.setFont(u8x8_font_chroma48medium8_r);
   switch (selectedMode) {
     case WASHING:
       u8x8.draw2x2String(0, 1, "Washing");
@@ -110,10 +110,13 @@ void printModeName() {
 }
 
 void updateCountdownDisplay(unsigned long time) {
-  u8x8.setFont(u8x8_font_profont29_2x3_n);
-  u8x8.setCursor(0, 5);
-  u8x8.print(time);
-  u8x8.print("      "); // clears extra numbers from the display
+  // string is expensive but i see no other way around this. it is cheaper than including another font and using print
+  //u8x8.setFont(u8x8_font_chroma48medium8_r);
+  String strTime = String(time);
+  while (strTime.length() < 8) {
+    strTime = strTime + ' ';
+  }
+  u8x8.draw2x2String(0, 5, strTime.c_str());
 }
 
 void stepperIsr() {
@@ -217,7 +220,7 @@ void loop(void)
 {
   selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
   #ifndef DEBUG
-    u8x8.setFont(u8x8_font_profont29_2x3_r);
+    //u8x8.setFont(u8x8_font_chroma48medium8_r);
     switch (operatingMode) {
       case WASHING:
         setupStepper(WASH_MAX_SPEED, WASH_ACCELERATION);
@@ -227,13 +230,13 @@ void loop(void)
         performCure();
         break;
       case COMPLETE:
-        u8x8.drawString(0, 5, "Complete");
+        u8x8.draw2x2String(0, 5, "Complete");
         break;
       case HALTED:
-        u8x8.drawString(0, 5, "Halted");
+        u8x8.draw2x2String(0, 5, "Halted");
         break;
       default:
-        u8x8.drawString(0, 5, "Idle");
+        u8x8.draw2x2String(0, 5, "Idle");
         break;
     }
   #endif
