@@ -2,6 +2,7 @@
 #include <U8x8lib.h>
 #include <configuration.h>
 #include <AccelStepper.h>
+#include <TimerOne.h>
 
 #ifdef U8X8_HAVE_HW_SPI
 #include <SPI.h>
@@ -25,6 +26,7 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define UV_ON       255
 #define UV_OFF        0
 #define MOTOR_IF_TYPE 1
+#define INT_TIMER    50
 
 AccelStepper myStepper(MOTOR_IF_TYPE, STEP_PIN, DIR_PIN);
 
@@ -58,6 +60,7 @@ void performCure();
 void spinDown(bool disableStepper = true);
 void changeStepperDir();
 void setupStepper();
+void stepperIsr();
 
 void setup(void)
 {
@@ -113,22 +116,30 @@ void updateCountdownDisplay(unsigned long time) {
   u8x8.print("      "); // clears extra numbers from the display
 }
 
+void stepperIsr() {
+  myStepper.run();
+}
+
 void performWash() {
   //pre();
   startMillis = millis(); // we need to know when we started the cycle
   int runningDuration = selectedDuration;
   long halfDuration = selectedDuration / 2;
   updateCountdownDisplay(runningDuration); // just to get the first time showing
+
+  Timer1.initialize(INT_TIMER);// setup interrupt for the stepper
+  Timer1.attachInterrupt(stepperIsr);
+
   while (1) {
     if (myStepper.distanceToGo() == 0) {
       myStepper.moveTo(pos);
     }
-    myStepper.run();
+
     currentMillis = millis();
     if(currentMillis - startMillis > interval) {
       startMillis = millis();
       runningDuration--;
-      //updateCountdownDisplay(runningDuration);
+      updateCountdownDisplay(runningDuration);
     }
     if (runningDuration <= halfDuration and pos > 0) {
       operatingMode = WASHING_REV;
@@ -179,6 +190,7 @@ void performCure() {
 
 void changeStepperDir() {
   spinDown(false);
+  Timer1.attachInterrupt(stepperIsr);
   pos = pos * -1;
 }
 
@@ -191,6 +203,7 @@ void setupStepper(int maxSpeed, int acceleration) {
 }
 
 void spinDown(bool disableStepper = true) {
+  Timer1.detachInterrupt();
   myStepper.stop();
   while(myStepper.speed() != 0) {
     myStepper.runToPosition();
