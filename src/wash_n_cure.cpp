@@ -15,18 +15,23 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 
 //https://tronixstuff.com/2019/08/29/ssd1306-arduino-tutorial/
 
-#define START_PIN   12
-#define STOP_PIN    11
-#define MODE_PIN    10
-#define UV_LED_PIN   9
-#define DIR_PIN      2
-#define STEP_PIN     3
-#define DRV_ENABLE  A3
+#define START_PIN     12
+#define STOP_PIN      11
+#define MODE_PIN      10
+#define UV_LED_PIN     9
+#define DIR_PIN        2
+#define STEP_PIN       3
+#define DRV_ENABLE    A3
 
-#define UV_ON       255
-#define UV_OFF        0
-#define MOTOR_IF_TYPE 1
-#define INT_TIMER    50
+#define TIMER0_PIN    A0
+#define TIMER1_PIN    A1
+#define TIMER2_PIN    A2
+#define TIME_SEL_PIN   4
+
+#define UV_ON        255
+#define UV_OFF         0
+#define MOTOR_IF_TYPE  1
+#define INT_TIMER     50
 
 AccelStepper myStepper(MOTOR_IF_TYPE, STEP_PIN, DIR_PIN);
 
@@ -61,6 +66,7 @@ void spinDown(bool disableStepper = true);
 void changeStepperDir();
 void setupStepper();
 void stepperIsr();
+void changeDuration();
 
 void setup(void)
 {
@@ -73,10 +79,14 @@ void setup(void)
   pinMode(START_PIN, INPUT);
   pinMode(STOP_PIN, INPUT);
   pinMode(MODE_PIN, INPUT);
+  pinMode(TIME_SEL_PIN, INPUT);
   pinMode(UV_LED_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
   pinMode(STEP_PIN, OUTPUT);
   pinMode(DRV_ENABLE, OUTPUT);
+  pinMode(TIMER0_PIN, OUTPUT);
+  pinMode(TIMER1_PIN, OUTPUT);
+  pinMode(TIMER2_PIN, OUTPUT);
   digitalWrite(DRV_ENABLE, HIGH); // disable the a4988 driver
 
   oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
@@ -216,6 +226,23 @@ void spinDown(bool disableStepper = true) {
   }
 }
 
+void changeDuration() {
+  switch (selectedDuration) {
+    case TIME0:
+      selectedDuration = TIME1;
+      break;
+    case TIME1:
+      selectedDuration = TIME2;
+      break;
+    case TIME2:
+      selectedDuration = TIME0;
+      break;
+    default:
+      selectedDuration = TIME1;
+      break;
+  }
+}
+
 void loop(void)
 {
   selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
@@ -239,6 +266,30 @@ void loop(void)
         u8x8.draw2x2String(0, 5, "Idle");
         break;
     }
+
+    switch (selectedDuration) {
+      case TIME0:
+        digitalWrite(TIMER0_PIN, HIGH);
+        digitalWrite(TIMER1_PIN, LOW);
+        digitalWrite(TIMER2_PIN, LOW);
+        break;
+      case TIME1:
+        digitalWrite(TIMER1_PIN, HIGH);
+        digitalWrite(TIMER0_PIN, LOW);
+        digitalWrite(TIMER2_PIN, LOW);
+        break;
+      case TIME2:
+        digitalWrite(TIMER2_PIN, HIGH);
+        digitalWrite(TIMER0_PIN, LOW);
+        digitalWrite(TIMER1_PIN, LOW);
+        break;
+    }
+
+    if (digitalRead(TIME_SEL_PIN) == HIGH) {
+      changeDuration();
+      while (digitalRead(TIME_SEL_PIN) == HIGH) {} // simple trap to avoid needing debounce
+    }
+
   #endif
 
   if (selectedMode != oldSelectedMode) {
