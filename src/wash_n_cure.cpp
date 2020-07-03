@@ -18,15 +18,18 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define START_PIN     12
 #define STOP_PIN      11
 #define MODE_PIN      10
+#define WASH_MODE_PIN  4
+#define CURE_MODE_PIN  5
 #define UV_LED_PIN     9
 #define DIR_PIN        2
 #define STEP_PIN       3
 #define DRV_ENABLE    A3
+#define SPEAKER        8
 
 #define TIMER0_PIN    A0
 #define TIMER1_PIN    A1
 #define TIMER2_PIN    A2
-#define TIME_SEL_PIN   4
+#define TIME_SEL_PIN  A7
 
 #define UV_ON        255
 #define UV_OFF         0
@@ -79,7 +82,8 @@ void setup(void)
   pinMode(START_PIN, INPUT);
   pinMode(STOP_PIN, INPUT);
   pinMode(MODE_PIN, INPUT);
-  pinMode(TIME_SEL_PIN, INPUT);
+  pinMode(WASH_MODE_PIN, OUTPUT);
+  pinMode(CURE_MODE_PIN, OUTPUT);
   pinMode(UV_LED_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
   pinMode(STEP_PIN, OUTPUT);
@@ -87,7 +91,12 @@ void setup(void)
   pinMode(TIMER0_PIN, OUTPUT);
   pinMode(TIMER1_PIN, OUTPUT);
   pinMode(TIMER2_PIN, OUTPUT);
+  pinMode(SPEAKER, OUTPUT);
   digitalWrite(DRV_ENABLE, HIGH); // disable the a4988 driver
+
+  tone(SPEAKER, 3000);
+  delay(1000);
+  noTone(SPEAKER);
 
   oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
 }
@@ -109,12 +118,18 @@ void printModeName() {
   switch (selectedMode) {
     case WASHING:
       u8x8.draw2x2String(0, 1, "Washing");
+      digitalWrite(WASH_MODE_PIN, LOW);
+      digitalWrite(CURE_MODE_PIN, HIGH);
       break;
     case CURING:
       u8x8.draw2x2String(0, 1, "Curing "); // space after needed to clear the display
+      digitalWrite(WASH_MODE_PIN, HIGH);
+      digitalWrite(CURE_MODE_PIN, LOW);
       break;
     default:
       u8x8.draw2x2String(0, 1, "Washing");
+      digitalWrite(WASH_MODE_PIN, LOW);
+      digitalWrite(CURE_MODE_PIN, HIGH);
       break;
   }
 }
@@ -285,9 +300,9 @@ void loop(void)
         break;
     }
 
-    if (digitalRead(TIME_SEL_PIN) == HIGH) {
+    if (analogRead(TIME_SEL_PIN) > 512) {
       changeDuration();
-      while (digitalRead(TIME_SEL_PIN) == HIGH) {} // simple trap to avoid needing debounce
+      while (analogRead(TIME_SEL_PIN) > 512) {} // simple trap to avoid needing debounce
     }
 
   #endif
