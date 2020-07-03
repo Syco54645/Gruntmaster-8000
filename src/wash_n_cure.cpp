@@ -18,8 +18,8 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define START_PIN     12
 #define STOP_PIN      11
 #define MODE_PIN      10
-#define WASH_MODE_PIN  4
-#define CURE_MODE_PIN  5
+#define WASH_MODE_LED  4
+#define CURE_MODE_LED  5
 #define UV_LED_PIN     9
 #define DIR_PIN        2
 #define STEP_PIN       3
@@ -82,8 +82,8 @@ void setup(void)
   pinMode(START_PIN, INPUT);
   pinMode(STOP_PIN, INPUT);
   pinMode(MODE_PIN, INPUT);
-  pinMode(WASH_MODE_PIN, OUTPUT);
-  pinMode(CURE_MODE_PIN, OUTPUT);
+  pinMode(WASH_MODE_LED, OUTPUT);
+  pinMode(CURE_MODE_LED, OUTPUT);
   pinMode(UV_LED_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
   pinMode(STEP_PIN, OUTPUT);
@@ -118,18 +118,18 @@ void printModeName() {
   switch (selectedMode) {
     case WASHING:
       u8x8.draw2x2String(0, 1, "Washing");
-      digitalWrite(WASH_MODE_PIN, LOW);
-      digitalWrite(CURE_MODE_PIN, HIGH);
+      digitalWrite(WASH_MODE_LED, LOW);
+      digitalWrite(CURE_MODE_LED, HIGH);
       break;
     case CURING:
       u8x8.draw2x2String(0, 1, "Curing "); // space after needed to clear the display
-      digitalWrite(WASH_MODE_PIN, HIGH);
-      digitalWrite(CURE_MODE_PIN, LOW);
+      digitalWrite(WASH_MODE_LED, HIGH);
+      digitalWrite(CURE_MODE_LED, LOW);
       break;
     default:
       u8x8.draw2x2String(0, 1, "Washing");
-      digitalWrite(WASH_MODE_PIN, LOW);
-      digitalWrite(CURE_MODE_PIN, HIGH);
+      digitalWrite(WASH_MODE_LED, LOW);
+      digitalWrite(CURE_MODE_LED, HIGH);
       break;
   }
 }
