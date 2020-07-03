@@ -15,7 +15,7 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 
 //https://tronixstuff.com/2019/08/29/ssd1306-arduino-tutorial/
 
-#define START_PIN     12
+#define START_PIN     13
 #define STOP_PIN      11
 #define MODE_PIN      10
 #define WASH_MODE_LED  4
@@ -24,12 +24,19 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define DIR_PIN        2
 #define STEP_PIN       3
 #define DRV_ENABLE    A3
-#define SPEAKER        8
+#define SPEAKER       12
 
 #define TIMER0_LED    A0
 #define TIMER1_LED    A1
 #define TIMER2_LED    A2
-#define TIME_SEL_PIN  A7
+#ifndef TIME_SEL_SWITCH
+  #define TIME_SEL_PIN   7
+#endif
+#if defined(TIME_SEL_SWITCH)
+  #define TIME_SEL_PIN1  7
+  #define TIME_SEL_PIN2  8
+  #define TIME_SEL_PIN3  9
+#endif
 
 #define UV_ON        255
 #define UV_OFF         0
@@ -300,9 +307,13 @@ void loop(void)
         break;
     }
 
-    if (analogRead(TIME_SEL_PIN) > 512) {
+    /*if (analogRead(TIME_SEL_PIN) > 512) {
       changeDuration();
       while (analogRead(TIME_SEL_PIN) > 512) {} // simple trap to avoid needing debounce
+    }*/
+    if (digitalRead(TIME_SEL_PIN) == HIGH) {
+      changeDuration();
+      while (digitalRead(TIME_SEL_PIN) == HIGH) {} // simple trap to avoid needing debounce
     }
 
   #endif

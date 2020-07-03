@@ -13,3 +13,4 @@
 #define CURE_ACCELERATION 200
 
 #define FLIP_SCREEN
+//#define TIME_SEL_SWITCH
