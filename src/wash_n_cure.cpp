@@ -33,9 +33,9 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
   #define TIME_SEL_PIN   7
 #endif
 #if defined(TIME_SEL_SWITCH)
-  #define TIME_SEL_PIN1  7
-  #define TIME_SEL_PIN2  8
-  #define TIME_SEL_PIN3  9
+  #define TIME_SEL_PIN0  7
+  #define TIME_SEL_PIN1  8
+  #define TIME_SEL_PIN2  9
 #endif
 
 #define UV_ON        255
