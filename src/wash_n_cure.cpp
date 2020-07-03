@@ -59,7 +59,12 @@ enum State
 int operatingMode = IDLE;
 unsigned int selectedMode;
 unsigned int oldSelectedMode;
-unsigned int selectedDuration = TIME0;  //hardcoded for now. remove when switch is added
+#ifndef TIME_SEL_SWITCH
+  unsigned int selectedDuration = DEFAULT_TIME;
+#endif
+#if defined(TIME_SEL_SWITCH)
+  unsigned int selectedDuration = TIME0;
+#endif
 
 //time slicing
 unsigned long interval = 1000; // tick at 1 second
