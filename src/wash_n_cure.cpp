@@ -101,6 +101,9 @@ void setup(void)
   pinMode(SPEAKER, OUTPUT);
   digitalWrite(DRV_ENABLE, HIGH); // disable the a4988 driver
 
+  digitalWrite(WASH_MODE_LED, LOW);
+  digitalWrite(CURE_MODE_LED, LOW);
+
   tone(SPEAKER, 3000);
   delay(1000);
   noTone(SPEAKER);
