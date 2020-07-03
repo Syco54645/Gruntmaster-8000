@@ -26,9 +26,9 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define DRV_ENABLE    A3
 #define SPEAKER        8
 
-#define TIMER0_PIN    A0
-#define TIMER1_PIN    A1
-#define TIMER2_PIN    A2
+#define TIMER0_LED    A0
+#define TIMER1_LED    A1
+#define TIMER2_LED    A2
 #define TIME_SEL_PIN  A7
 
 #define UV_ON        255
@@ -88,9 +88,9 @@ void setup(void)
   pinMode(DIR_PIN, OUTPUT);
   pinMode(STEP_PIN, OUTPUT);
   pinMode(DRV_ENABLE, OUTPUT);
-  pinMode(TIMER0_PIN, OUTPUT);
-  pinMode(TIMER1_PIN, OUTPUT);
-  pinMode(TIMER2_PIN, OUTPUT);
+  pinMode(TIMER0_LED, OUTPUT);
+  pinMode(TIMER1_LED, OUTPUT);
+  pinMode(TIMER2_LED, OUTPUT);
   pinMode(SPEAKER, OUTPUT);
   digitalWrite(DRV_ENABLE, HIGH); // disable the a4988 driver
 
@@ -284,19 +284,19 @@ void loop(void)
 
     switch (selectedDuration) {
       case TIME0:
-        digitalWrite(TIMER0_PIN, HIGH);
-        digitalWrite(TIMER1_PIN, LOW);
-        digitalWrite(TIMER2_PIN, LOW);
+        digitalWrite(TIMER0_LED, HIGH);
+        digitalWrite(TIMER1_LED, LOW);
+        digitalWrite(TIMER2_LED, LOW);
         break;
       case TIME1:
-        digitalWrite(TIMER1_PIN, HIGH);
-        digitalWrite(TIMER0_PIN, LOW);
-        digitalWrite(TIMER2_PIN, LOW);
+        digitalWrite(TIMER1_LED, HIGH);
+        digitalWrite(TIMER0_LED, LOW);
+        digitalWrite(TIMER2_LED, LOW);
         break;
       case TIME2:
-        digitalWrite(TIMER2_PIN, HIGH);
-        digitalWrite(TIMER0_PIN, LOW);
-        digitalWrite(TIMER1_PIN, LOW);
+        digitalWrite(TIMER2_LED, HIGH);
+        digitalWrite(TIMER0_LED, LOW);
+        digitalWrite(TIMER1_LED, LOW);
         break;
     }
 
