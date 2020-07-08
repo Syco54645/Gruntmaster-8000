@@ -26,6 +26,9 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define DRV_ENABLE    A3
 #define SPEAKER       12
 
+#define SAFETY_PIN    A6
+#define OVERRIDE_PIN  A7
+
 #define TIMER0_LED    A0
 #define TIMER1_LED    A1
 #define TIMER2_LED    A2
@@ -82,9 +85,10 @@ void changeStepperDir();
 void setupStepper();
 void stepperIsr();
 void changeDuration();
+bool isSafetyEngaged();
+bool isSafetyOverrideEngaged();
 
-void setup(void)
-{
+void setup(void) {
   u8x8.begin();
   #if defined(FLIP_SCREEN)
     u8x8.setFlipMode(1);
@@ -116,8 +120,7 @@ void setup(void)
   oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
 }
 
-void pre(void)
-{
+void pre(void) {
   u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.clear();
 
@@ -194,7 +197,7 @@ void performWash() {
       operatingMode = COMPLETE;
       break;
     }
-    if (digitalRead(STOP_PIN) == HIGH) {
+    if (digitalRead(STOP_PIN) == HIGH || (!isSafetyEngaged() && !isSafetyOverrideEngaged())) {
       //pre();
       spinDown();
       operatingMode = HALTED;
@@ -222,7 +225,7 @@ void performCure() {
       analogWrite(UV_LED_PIN, UV_OFF);
       break;
     }
-    if (digitalRead(STOP_PIN) == HIGH) {
+    if (digitalRead(STOP_PIN) == HIGH || !isSafetyEngaged()) {
       //pre();
       operatingMode = HALTED;
       analogWrite(UV_LED_PIN, UV_OFF);
@@ -273,18 +276,44 @@ void changeDuration() {
   }
 }
 
-void loop(void)
-{
+bool isSafetyEngaged() {
+  #ifndef DISABLE_SAFETY
+    if (analogRead(SAFETY_PIN) < 512) {
+      return false;
+    }
+  #endif
+  return true;
+}
+
+bool isSafetyOverrideEngaged() {
+  #ifndef FAKE_SAFETY_OVERRIDE
+    if (analogRead(OVERRIDE_PIN) < 512) {
+      return false;
+    }
+  #endif
+  return true;
+}
+
+void loop(void) {
   selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
   #ifndef DEBUG
     //u8x8.setFont(u8x8_font_chroma48medium8_r);
     switch (operatingMode) {
       case WASHING:
-        setupStepper(WASH_MAX_SPEED, WASH_ACCELERATION);
-        performWash();
+        if (isSafetyEngaged() || (!isSafetyEngaged() && isSafetyOverrideEngaged())) {
+          setupStepper(WASH_MAX_SPEED, WASH_ACCELERATION);
+          performWash();
+        } else {
+          // error beep
+          operatingMode = IDLE;
+        }
         break;
       case CURING:
-        performCure();
+        if (isSafetyEngaged()) {
+          performCure();
+        } else {
+          operatingMode = IDLE;
+        }
         break;
       case COMPLETE:
         u8x8.draw2x2String(0, 5, "Complete");
@@ -315,10 +344,6 @@ void loop(void)
         break;
     }
 
-    /*if (analogRead(TIME_SEL_PIN) > 512) {
-      changeDuration();
-      while (analogRead(TIME_SEL_PIN) > 512) {} // simple trap to avoid needing debounce
-    }*/
     if (digitalRead(TIME_SEL_PIN) == HIGH) {
       changeDuration();
       while (digitalRead(TIME_SEL_PIN) == HIGH) {} // simple trap to avoid needing debounce

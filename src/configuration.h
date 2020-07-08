@@ -1,6 +1,8 @@
 #pragma once
 
 //#define DEBUG
+//#define DISABLE_SAFETY // it is not recommended to do this on a real machine. the safety is in place to avoid damage to your eyes via UV light
+//#define FAKE_SAFETY_OVERRIDE
 
 #define TIME0 60
 #define TIME1 240
