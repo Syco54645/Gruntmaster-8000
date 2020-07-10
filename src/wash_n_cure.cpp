@@ -182,7 +182,7 @@ void performWash() {
     }
 
     currentMillis = millis();
-    if(currentMillis - startMillis > interval) {
+    if(currentMillis - startMillis > interval && myStepper.speed() == WASH_MAX_SPEED) {
       startMillis = millis();
       runningDuration--;
       updateCountdownDisplay(runningDuration);
@@ -212,7 +212,15 @@ void performCure() {
   int runningDuration = selectedDuration;
   updateCountdownDisplay(runningDuration); // just to get the first time showing
   analogWrite(UV_LED_PIN, UV_ON);
+
+  Timer1.initialize(INT_TIMER);// setup interrupt for the stepper
+  Timer1.attachInterrupt(stepperIsr);
+
   while (1) {
+    if (myStepper.distanceToGo() == 0) {
+      myStepper.moveTo(pos);
+    }
+
     currentMillis = millis();
     if(currentMillis - startMillis > interval) {
       startMillis = millis();
@@ -223,12 +231,14 @@ void performCure() {
       //pre();
       operatingMode = COMPLETE;
       analogWrite(UV_LED_PIN, UV_OFF);
+      spinDown();
       break;
     }
     if (digitalRead(STOP_PIN) == HIGH || !isSafetyEngaged()) {
       //pre();
       operatingMode = HALTED;
       analogWrite(UV_LED_PIN, UV_OFF);
+      spinDown();
       break;
     }
   }
@@ -310,6 +320,7 @@ void loop(void) {
         break;
       case CURING:
         if (isSafetyEngaged()) {
+          setupStepper(CURE_MAX_SPEED, CURE_ACCELERATION);
           performCure();
         } else {
           operatingMode = IDLE;
