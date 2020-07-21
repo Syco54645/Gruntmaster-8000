@@ -125,7 +125,7 @@ void pre(void) {
   u8x8.clear();
 
   u8x8.inverse();
-  u8x8.print("  Wash n' Cure  ");
+  u8x8.print("Gruntmaster 8000");
   //u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.noInverse();
   printModeName();
