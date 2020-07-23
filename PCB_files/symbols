@@ -10,7 +10,7 @@ SPKR: 2 pin - Speaker
 
 LED1 - 5 : 3mm LED
 
-B1-5 : 6x6 tactile button
+BUTT1-5 : 6x6 tactile button
 
 C1 : 47uF electrolytic capacitor
 
