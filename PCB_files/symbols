@@ -1,0 +1,27 @@
+
+Connectors are all “JST XH”, pin number stated below. 
+DISP : 4pin - DISPLAY
+AUX1-5 : 2 pin - Auxiliary button connectors (for OpTiOnS)
+AUX6 : 4 pin - Auxiliary button connector (for oPtIoNs)
+SAFE1-2: 2 pin - connectors for the lid safety
+MS1 : 3 pin - mode selection switch
+MOTOR : 4 pin - Motor connection
+SPKR: 2 pin - Speaker
+
+LED1 - 5 : 3mm LED
+
+B1-5 : 6x6 tactile button
+
+C1 : 47uF electrolytic capacitor
+
+Q1 : IRLB8721 MOSFET
+
+R1 : 10K
+R2-R6 : calculated per LED selected
+R7-14 : need to confirm
+
+P_IN : 2.54mm pitch screw terminal for power input
+LED_OUT : 2.54mm pitch screw terminal for UV LED output
+
+MCU : Arduino Nano MCU
+STEPPER : A4988 Stepper Motor Driver
