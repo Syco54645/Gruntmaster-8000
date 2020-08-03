@@ -33,12 +33,12 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define TIMER1_LED    A1
 #define TIMER2_LED    A2
 #ifndef TIME_SEL_SWITCH
-  #define TIME_SEL_PIN   7
+  #define TIME_SEL_PIN   6
 #endif
 #if defined(TIME_SEL_SWITCH)
-  #define TIME_SEL_PIN0  7
-  #define TIME_SEL_PIN1  8
-  #define TIME_SEL_PIN2  9
+  #define TIME_SEL_PIN0  6
+  #define TIME_SEL_PIN1  7
+  #define TIME_SEL_PIN2  8
 #endif
 
 #define UV_ON        255
@@ -305,8 +305,8 @@ bool isSafetyOverrideEngaged() {
 }
 
 void loop(void) {
-  selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
   #ifndef DEBUG
+    selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
     //u8x8.setFont(u8x8_font_chroma48medium8_r);
     switch (operatingMode) {
       case WASHING:
@@ -360,29 +360,101 @@ void loop(void) {
       while (digitalRead(TIME_SEL_PIN) == HIGH) {} // simple trap to avoid needing debounce
     }
 
+    if (selectedMode != oldSelectedMode) {
+      oldSelectedMode = selectedMode;
+      printModeName();
+    }
+
+    if (digitalRead(START_PIN) == HIGH) {
+      operatingMode = selectedMode;
+    }
   #endif
 
-  if (selectedMode != oldSelectedMode) {
-    oldSelectedMode = selectedMode;
-    printModeName();
-  }
-
-  if (digitalRead(START_PIN) == HIGH) {
-    operatingMode = selectedMode;
-  }
 
   #if defined(DEBUG)
     u8x8.setFont(u8x8_font_inb33_3x6_n);
-    u8x8.setCursor(0, 2);
-    u8x8.clear();
-    if (digitalRead(STOP_PIN) == HIGH) {
-      u8x8.print(123);
-    } else if (digitalRead(START_PIN) == HIGH) {
-      u8x8.print(456);
-    } else if (digitalRead(MODE_PIN) == HIGH){
-      u8x8.print(100);
+    //u8x8.setCursor(0, 0);
+
+    u8x8.setFont(u8x8_font_chroma48medium8_r);
+    //u8x8.clear();
+
+    //u8x8.inverse();
+    //u8x8.print("Gruntmaster 8000");
+
+    u8x8.setCursor(2, 0);
+    u8x8.print("              ");
+    if (digitalRead(START_PIN) == HIGH) {
+      u8x8.print("START_PIN: HI");
     } else {
-      u8x8.print(789);
+      u8x8.print("START_PIN: LO");
     }
+
+    u8x8.setCursor(2, 1);
+    u8x8.print("              ");
+    if (digitalRead(STOP_PIN) == HIGH) {
+      u8x8.print("STOP_PIN: HI");
+    } else {
+      u8x8.print("STOP_PIN: LO");
+    }
+
+    u8x8.setCursor(2, 2);
+    u8x8.print("              ");
+    if (digitalRead(MODE_PIN) == HIGH) {
+      u8x8.print("MODE_PIN: HI");
+    } else {
+      u8x8.print("MODE_PIN: LO");
+    }
+
+    u8x8.setCursor(2, 3);
+    u8x8.print("              ");
+    if (digitalRead(SAFETY_PIN) == HIGH) {
+      u8x8.print("SAFETY_PIN: HI");
+    } else {
+      u8x8.print("SAFETY_PIN: LO");
+    }
+
+    u8x8.setCursor(2, 4);
+    u8x8.print("              ");
+    if (digitalRead(OVERRIDE_PIN) == HIGH) {
+      u8x8.print("OVERRIDE_PIN: HI");
+    } else {
+      u8x8.print("OVERRIDE_PIN: LO");
+    }
+
+    #ifndef TIME_SEL_SWITCH
+      u8x8.setCursor(2, 5);
+      u8x8.print("              ");
+      if (digitalRead(TIME_SEL_PIN) == HIGH) {
+        u8x8.print("TIME_SEL_PIN: HI");
+      } else {
+        u8x8.print("TIME_SEL_PIN: LO");
+      }
+    #endif
+
+    #if defined(TIME_SEL_SWITCH)
+      u8x8.setCursor(2, 5);
+      u8x8.print("              ");
+      if (digitalRead(TIME_SEL_PIN0) == HIGH) {
+        u8x8.print("TIME_SEL_PIN0:HI");
+      } else {
+        u8x8.print("TIME_SEL_PIN0:LO");
+      }
+
+      u8x8.setCursor(2, 6);
+      u8x8.print("              ");
+      if (digitalRead(TIME_SEL_PIN1) == HIGH) {
+        u8x8.print("TIME_SEL_PIN1:HI");
+      } else {
+        u8x8.print("TIME_SEL_PIN1:LO");
+      }
+
+      u8x8.setCursor(2, 7);
+      u8x8.print("              ");
+      if (digitalRead(TIME_SEL_PIN2) == HIGH) {
+        u8x8.print("TIME_SEL_PIN2:HI");
+      } else {
+        u8x8.print("TIME_SEL_PIN2:LO");
+      }
+    #endif
   #endif
 }
