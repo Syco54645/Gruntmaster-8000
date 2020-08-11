@@ -29,9 +29,9 @@ U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 #define SAFETY_PIN    A6
 #define OVERRIDE_PIN  A7
 
-#define TIMER0_LED    A0
+#define TIMER0_LED    A2
 #define TIMER1_LED    A1
-#define TIMER2_LED    A2
+#define TIMER2_LED    A0
 #ifndef TIME_SEL_SWITCH
   #define TIME_SEL_PIN   6
 #endif
