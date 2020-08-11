@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <U8x8lib.h>
 #include <configuration.h>
+#include <tones.h>
 #include <AccelStepper.h>
 #include <TimerOne.h>
 
@@ -113,9 +114,128 @@ void setup(void) {
   digitalWrite(WASH_MODE_LED, LOW);
   digitalWrite(CURE_MODE_LED, LOW);
 
-  tone(SPEAKER, 3000);
-  delay(1000);
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
   noTone(SPEAKER);
+
+  tone(SPEAKER, NOTE_A5);
+  delay(500);
+  noTone(SPEAKER);
+
+  tone(SPEAKER, NOTE_G5);
+  delay(500);
+  noTone(SPEAKER);
+
+  tone(SPEAKER, NOTE_A5);
+  delay(500);
+  noTone(SPEAKER);
+
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(100);
+
+  tone(SPEAKER, NOTE_A5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+
+  tone(SPEAKER, NOTE_A5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+
+  tone(SPEAKER, NOTE_A5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(100);
+
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(100);
+
+    tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+
+  tone(SPEAKER, NOTE_A5);
+  delay(500);
+  noTone(SPEAKER);
+
+  tone(SPEAKER, NOTE_G5);
+  delay(500);
+  noTone(SPEAKER);
+
+  tone(SPEAKER, NOTE_A5);
+  delay(500);
+  noTone(SPEAKER);
+
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(100);
+
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+  tone(SPEAKER, NOTE_A5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+  tone(SPEAKER, NOTE_A5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+  tone(SPEAKER, NOTE_B5);
+  delay(500);
+  noTone(SPEAKER);
+  delay(50);
+  tone(SPEAKER, NOTE_G5);
+  delay(5000);
+  noTone(SPEAKER);
+  delay(50);
+
+
+
+
+
+
 
   oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
 }
