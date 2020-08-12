@@ -104,9 +104,11 @@ void setup(void) {
   pinMode(DIR_PIN, OUTPUT);
   pinMode(STEP_PIN, OUTPUT);
   pinMode(DRV_ENABLE, OUTPUT);
-  pinMode(TIMER0_LED, OUTPUT);
-  pinMode(TIMER1_LED, OUTPUT);
-  pinMode(TIMER2_LED, OUTPUT);
+  #ifndef DISABLE_TIME_LEDS
+    pinMode(TIMER0_LED, OUTPUT);
+    pinMode(TIMER1_LED, OUTPUT);
+    pinMode(TIMER2_LED, OUTPUT);
+  #endif
   pinMode(SPEAKER, OUTPUT);
   digitalWrite(DRV_ENABLE, HIGH); // disable the a4988 driver
 
@@ -349,23 +351,25 @@ void loop(void) {
         break;
     }
 
-    switch (selectedDuration) {
-      case TIME0:
-        digitalWrite(TIMER0_LED, HIGH);
-        digitalWrite(TIMER1_LED, LOW);
-        digitalWrite(TIMER2_LED, LOW);
-        break;
-      case TIME1:
-        digitalWrite(TIMER1_LED, HIGH);
-        digitalWrite(TIMER0_LED, LOW);
-        digitalWrite(TIMER2_LED, LOW);
-        break;
-      case TIME2:
-        digitalWrite(TIMER2_LED, HIGH);
-        digitalWrite(TIMER0_LED, LOW);
-        digitalWrite(TIMER1_LED, LOW);
-        break;
-    }
+    #ifndef DISABLE_TIME_LEDS
+      switch (selectedDuration) {
+        case TIME0:
+          digitalWrite(TIMER0_LED, HIGH);
+          digitalWrite(TIMER1_LED, LOW);
+          digitalWrite(TIMER2_LED, LOW);
+          break;
+        case TIME1:
+          digitalWrite(TIMER1_LED, HIGH);
+          digitalWrite(TIMER0_LED, LOW);
+          digitalWrite(TIMER2_LED, LOW);
+          break;
+        case TIME2:
+          digitalWrite(TIMER2_LED, HIGH);
+          digitalWrite(TIMER0_LED, LOW);
+          digitalWrite(TIMER1_LED, LOW);
+          break;
+      }
+    #endif
 
     if (digitalRead(TIME_SEL_PIN) == HIGH) {
       changeDuration();
