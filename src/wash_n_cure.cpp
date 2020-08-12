@@ -98,8 +98,12 @@ void setup(void) {
   pinMode(START_PIN, INPUT);
   pinMode(STOP_PIN, INPUT);
   pinMode(MODE_PIN, INPUT);
-  pinMode(WASH_MODE_LED, OUTPUT);
-  pinMode(CURE_MODE_LED, OUTPUT);
+  #ifndef DISABLE_MODE_LEDS
+    pinMode(WASH_MODE_LED, OUTPUT);
+    pinMode(CURE_MODE_LED, OUTPUT);
+    digitalWrite(WASH_MODE_LED, LOW);
+    digitalWrite(CURE_MODE_LED, LOW);
+  #endif
   pinMode(UV_LED_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
   pinMode(STEP_PIN, OUTPUT);
@@ -112,8 +116,7 @@ void setup(void) {
   pinMode(SPEAKER, OUTPUT);
   digitalWrite(DRV_ENABLE, HIGH); // disable the a4988 driver
 
-  digitalWrite(WASH_MODE_LED, LOW);
-  digitalWrite(CURE_MODE_LED, LOW);
+
 
   tone(SPEAKER, 3000);
   delay(1000);
@@ -138,18 +141,24 @@ void printModeName() {
   switch (selectedMode) {
     case WASHING:
       u8x8.draw2x2String(0, 1, "Washing");
-      digitalWrite(WASH_MODE_LED, LOW);
-      digitalWrite(CURE_MODE_LED, HIGH);
+      #ifndef DISABLE_MODE_LEDS
+        digitalWrite(WASH_MODE_LED, LOW);
+        digitalWrite(CURE_MODE_LED, HIGH);
+      #endif
       break;
     case CURING:
       u8x8.draw2x2String(0, 1, "Curing "); // space after needed to clear the display
-      digitalWrite(WASH_MODE_LED, HIGH);
-      digitalWrite(CURE_MODE_LED, LOW);
+      #ifndef DISABLE_MODE_LEDS
+        digitalWrite(WASH_MODE_LED, HIGH);
+        digitalWrite(CURE_MODE_LED, LOW);
+      #endif
       break;
     default:
       u8x8.draw2x2String(0, 1, "Washing");
-      digitalWrite(WASH_MODE_LED, LOW);
-      digitalWrite(CURE_MODE_LED, HIGH);
+      #ifndef DISABLE_MODE_LEDS
+        digitalWrite(WASH_MODE_LED, LOW);
+        digitalWrite(CURE_MODE_LED, HIGH);
+      #endif
       break;
   }
 }

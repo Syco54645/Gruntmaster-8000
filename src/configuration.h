@@ -18,3 +18,4 @@
 //#define TIME_SEL_SWITCH
 //#define DISPLAY_SELECTED_TIME
 //#define DISABLE_TIME_LEDS
+//#define DISABLE_MODE_LEDS
