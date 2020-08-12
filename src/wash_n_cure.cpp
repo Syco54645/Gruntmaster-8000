@@ -87,6 +87,7 @@ void stepperIsr();
 void changeDuration();
 bool isSafetyEngaged();
 bool isSafetyOverrideEngaged();
+void debug();
 
 void setup(void) {
   u8x8.begin();
@@ -123,6 +124,13 @@ void setup(void) {
   noTone(SPEAKER);
 
   oldSelectedMode = IDLE; // not really a mode that can be selected but serves its purpose
+
+  if (digitalRead(START_PIN) == HIGH) {
+    debug();
+  }
+  #if defined(DEBUG)
+    debug();
+  #endif
 }
 
 void pre(void) {
@@ -315,88 +323,9 @@ bool isSafetyOverrideEngaged() {
   return true;
 }
 
-void loop(void) {
-  #ifndef DEBUG
-    selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
-    //u8x8.setFont(u8x8_font_chroma48medium8_r);
-    switch (operatingMode) {
-      case WASHING:
-        if (isSafetyEngaged() || (!isSafetyEngaged() && isSafetyOverrideEngaged())) {
-          setupStepper(WASH_MAX_SPEED, WASH_ACCELERATION);
-          performWash();
-        } else {
-          // error beep
-          operatingMode = IDLE;
-        }
-        break;
-      case CURING:
-        if (isSafetyEngaged()) {
-          setupStepper(CURE_MAX_SPEED, CURE_ACCELERATION);
-          performCure();
-        } else {
-          operatingMode = IDLE;
-        }
-        break;
-      case COMPLETE:
-        #if defined(DISPLAY_SELECTED_TIME)
-          updateCountdownDisplay(selectedDuration);
-        #else
-          u8x8.draw2x2String(0, 5, "Complete");
-        #endif
-        break;
-      case HALTED:
-        #if defined(DISPLAY_SELECTED_TIME)
-          updateCountdownDisplay(selectedDuration);
-        #else
-          u8x8.draw2x2String(0, 5, "Halted");
-        #endif
-        break;
-      default:
-        #if defined(DISPLAY_SELECTED_TIME)
-          updateCountdownDisplay(selectedDuration);
-        #else
-          u8x8.draw2x2String(0, 5, "Idle");
-        #endif
-        break;
-    }
+void debug() {
+  while (1) {
 
-    #ifndef DISABLE_TIME_LEDS
-      switch (selectedDuration) {
-        case TIME0:
-          digitalWrite(TIMER0_LED, HIGH);
-          digitalWrite(TIMER1_LED, LOW);
-          digitalWrite(TIMER2_LED, LOW);
-          break;
-        case TIME1:
-          digitalWrite(TIMER1_LED, HIGH);
-          digitalWrite(TIMER0_LED, LOW);
-          digitalWrite(TIMER2_LED, LOW);
-          break;
-        case TIME2:
-          digitalWrite(TIMER2_LED, HIGH);
-          digitalWrite(TIMER0_LED, LOW);
-          digitalWrite(TIMER1_LED, LOW);
-          break;
-      }
-    #endif
-
-    if (digitalRead(TIME_SEL_PIN) == HIGH) {
-      changeDuration();
-      while (digitalRead(TIME_SEL_PIN) == HIGH) {} // simple trap to avoid needing debounce
-    }
-
-    if (selectedMode != oldSelectedMode) {
-      oldSelectedMode = selectedMode;
-      printModeName();
-    }
-
-    if (digitalRead(START_PIN) == HIGH) {
-      operatingMode = selectedMode;
-    }
-  #endif
-
-
-  #if defined(DEBUG)
     u8x8.setFont(u8x8_font_inb33_3x6_n);
     //u8x8.setCursor(0, 0);
 
@@ -481,5 +410,85 @@ void loop(void) {
         u8x8.print("TIME_SEL_PIN2:LO");
       }
     #endif
+  }
+}
+
+void loop(void) {
+
+  selectedMode = digitalRead(MODE_PIN) == HIGH ? WASHING : CURING;
+  //u8x8.setFont(u8x8_font_chroma48medium8_r);
+  switch (operatingMode) {
+    case WASHING:
+      if (isSafetyEngaged() || (!isSafetyEngaged() && isSafetyOverrideEngaged())) {
+        setupStepper(WASH_MAX_SPEED, WASH_ACCELERATION);
+        performWash();
+      } else {
+        // error beep
+        operatingMode = IDLE;
+      }
+      break;
+    case CURING:
+      if (isSafetyEngaged()) {
+        setupStepper(CURE_MAX_SPEED, CURE_ACCELERATION);
+        performCure();
+      } else {
+        operatingMode = IDLE;
+      }
+      break;
+    case COMPLETE:
+      #if defined(DISPLAY_SELECTED_TIME)
+        updateCountdownDisplay(selectedDuration);
+      #else
+        u8x8.draw2x2String(0, 5, "Complete");
+      #endif
+      break;
+    case HALTED:
+      #if defined(DISPLAY_SELECTED_TIME)
+        updateCountdownDisplay(selectedDuration);
+      #else
+        u8x8.draw2x2String(0, 5, "Halted");
+      #endif
+      break;
+    default:
+      #if defined(DISPLAY_SELECTED_TIME)
+        updateCountdownDisplay(selectedDuration);
+      #else
+        u8x8.draw2x2String(0, 5, "Idle");
+      #endif
+      break;
+  }
+
+  #ifndef DISABLE_TIME_LEDS
+    switch (selectedDuration) {
+      case TIME0:
+        digitalWrite(TIMER0_LED, HIGH);
+        digitalWrite(TIMER1_LED, LOW);
+        digitalWrite(TIMER2_LED, LOW);
+        break;
+      case TIME1:
+        digitalWrite(TIMER1_LED, HIGH);
+        digitalWrite(TIMER0_LED, LOW);
+        digitalWrite(TIMER2_LED, LOW);
+        break;
+      case TIME2:
+        digitalWrite(TIMER2_LED, HIGH);
+        digitalWrite(TIMER0_LED, LOW);
+        digitalWrite(TIMER1_LED, LOW);
+        break;
+    }
   #endif
+
+  if (digitalRead(TIME_SEL_PIN) == HIGH) {
+    changeDuration();
+    while (digitalRead(TIME_SEL_PIN) == HIGH) {} // simple trap to avoid needing debounce
+  }
+
+  if (selectedMode != oldSelectedMode) {
+    oldSelectedMode = selectedMode;
+    printModeName();
+  }
+
+  if (digitalRead(START_PIN) == HIGH) {
+    operatingMode = selectedMode;
+  }
 }
