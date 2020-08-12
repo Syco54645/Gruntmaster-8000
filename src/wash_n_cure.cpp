@@ -327,13 +327,25 @@ void loop(void) {
         }
         break;
       case COMPLETE:
-        u8x8.draw2x2String(0, 5, "Complete");
+        #if defined(DISPLAY_SELECTED_TIME)
+          updateCountdownDisplay(selectedDuration);
+        #else
+          u8x8.draw2x2String(0, 5, "Complete");
+        #endif
         break;
       case HALTED:
-        u8x8.draw2x2String(0, 5, "Halted");
+        #if defined(DISPLAY_SELECTED_TIME)
+          updateCountdownDisplay(selectedDuration);
+        #else
+          u8x8.draw2x2String(0, 5, "Halted");
+        #endif
         break;
       default:
-        u8x8.draw2x2String(0, 5, "Idle");
+        #if defined(DISPLAY_SELECTED_TIME)
+          updateCountdownDisplay(selectedDuration);
+        #else
+          u8x8.draw2x2String(0, 5, "Idle");
+        #endif
         break;
     }
 
